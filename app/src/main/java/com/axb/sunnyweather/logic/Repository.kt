@@ -21,7 +21,7 @@ object Repository {
         }
     }
 
-    fun refreshWeather(lng: String, lat: String) = fire(Dispatchers.IO) {
+    fun refreshWeather(lng: String, lat: String, placeName: String) = fire(Dispatchers.IO) {
         coroutineScope {
             val deferredRealtime = async {
                 SunnyWeatherNetwork.getRealtimeWeather(lng, lat)
@@ -32,11 +32,7 @@ object Repository {
             val realtimeResponse = deferredRealtime.await()
             val dailyResponse = deferredDaily.await()
             if (realtimeResponse.status == "ok" && dailyResponse.status == "ok") {
-
-                val weather = Weather(
-                    realtimeResponse.result.realtime,
-                    dailyResponse.result.daily
-                )
+                val weather = Weather(realtimeResponse.result.realtime, dailyResponse.result.daily)
                 Result.success(weather)
             } else {
                 Result.failure(
@@ -49,6 +45,12 @@ object Repository {
         }
     }
 
+    fun savePlace(place: Place) = PlaceDao.savePlace(place)
+
+    fun getSavedPlace() = PlaceDao.getSavedPlace()
+
+    fun isPlaceSaved() = PlaceDao.isPlaceSaved()
+
     private fun <T> fire(context: CoroutineContext, block: suspend () -> Result<T>) =
         liveData<Result<T>>(context) {
             val result = try {
@@ -59,7 +61,4 @@ object Repository {
             emit(result)
         }
 
-    fun savePlace(place: Place) = PlaceDao.savePlace(place)
-    fun getSavedPlace() = PlaceDao.getSavedPlace()
-    fun isPlaceSaved() = PlaceDao.isPlaceSaved()
 }

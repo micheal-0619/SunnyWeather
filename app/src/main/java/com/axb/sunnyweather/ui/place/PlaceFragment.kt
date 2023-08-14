@@ -2,6 +2,7 @@ package com.axb.sunnyweather.ui.place
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,28 +11,32 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.axb.sunnyweather.MainActivity
 import com.axb.sunnyweather.R
 import com.axb.sunnyweather.WeatherActivity
 import com.axb.sunnyweather.databinding.FragmentPlaceBinding
 
-class PlaceFragment : Fragment() {
-    private lateinit var binding: FragmentPlaceBinding
+private const val TAG = "PlaceFragment"
 
-    val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
+class PlaceFragment : Fragment() {
+    private lateinit var bindingInflate : FragmentPlaceBinding
+
+    val viewModel by lazy { ViewModelProviders.of(this)[PlaceViewModel::class.java] }
+
     private lateinit var adapter: PlaceAdapter
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentPlaceBinding.inflate(layoutInflater)
-        return inflater.inflate(R.layout.fragment_place, container, false)
+        bindingInflate  = FragmentPlaceBinding.inflate(inflater, container, false);
+        return bindingInflate.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-        if (viewModel.isPlaceSaved()) {
+        if (activity is MainActivity && viewModel.isPlaceSaved()) {
             val place = viewModel.getSavedPlace()
             val intent = Intent(context, WeatherActivity::class.java).apply {
                 putExtra("location_lng", place.location.lng)
@@ -44,16 +49,18 @@ class PlaceFragment : Fragment() {
         }
 
         val layoutManager = LinearLayoutManager(activity)
-        binding.recyclerView.layoutManager = layoutManager
+        bindingInflate.recyclerView.layoutManager = layoutManager
+        Log.d(TAG, "onActivityCreated: 11111111")
         adapter = PlaceAdapter(this, viewModel.placeList)
-        binding.recyclerView.adapter = adapter
-        binding.searchPlaceEdit.addTextChangedListener { editable ->
+        bindingInflate.recyclerView.adapter = adapter
+        bindingInflate.searchPlaceEdit.addTextChangedListener { editable ->
             val content = editable.toString()
+            Log.d(TAG, "onActivityCreated: content== $content")
             if (content.isNotEmpty()) {
                 viewModel.searchPlaces(content)
             } else {
-                binding.recyclerView.visibility = View.GONE
-                binding.bgImageView.visibility = View.VISIBLE
+                bindingInflate.recyclerView.visibility = View.GONE
+                bindingInflate.bgImageView.visibility = View.VISIBLE
                 viewModel.placeList.clear()
                 adapter.notifyDataSetChanged()
             }
@@ -61,8 +68,8 @@ class PlaceFragment : Fragment() {
         viewModel.placeLiveData.observe(viewLifecycleOwner, Observer { result ->
             val places = result.getOrNull()
             if (places != null) {
-                binding.recyclerView.visibility = View.VISIBLE
-                binding.bgImageView.visibility = View.GONE
+                bindingInflate.recyclerView.visibility = View.VISIBLE
+                bindingInflate.bgImageView.visibility = View.GONE
                 viewModel.placeList.clear()
                 viewModel.placeList.addAll(places)
                 adapter.notifyDataSetChanged()
