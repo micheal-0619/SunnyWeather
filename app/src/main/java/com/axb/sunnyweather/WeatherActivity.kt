@@ -14,12 +14,8 @@ import android.widget.Toast
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.axb.sunnyweather.databinding.ActivityWeatherBinding
-import com.axb.sunnyweather.databinding.ForecastBinding
-import com.axb.sunnyweather.databinding.LifeIndexBinding
-import com.axb.sunnyweather.databinding.NowBinding
 import com.axb.sunnyweather.logic.model.Weather
 import com.axb.sunnyweather.logic.model.getSky
 import com.axb.sunnyweather.ui.weather.WeatherViewModel
@@ -29,9 +25,6 @@ import java.util.Locale
 class WeatherActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityWeatherBinding
-    private lateinit var bindingNow: NowBinding
-    private lateinit var bindingLif: LifeIndexBinding
-    private lateinit var bindingForecast: ForecastBinding
 
 
     val viewModel by lazy { ViewModelProviders.of(this)[WeatherViewModel::class.java] }
@@ -45,10 +38,6 @@ class WeatherActivity : AppCompatActivity() {
             window.statusBarColor = Color.TRANSPARENT
         }
         binding = ActivityWeatherBinding.inflate(layoutInflater)
-        bindingNow = NowBinding.inflate(layoutInflater)
-        bindingLif = LifeIndexBinding.inflate(layoutInflater)
-        bindingForecast = ForecastBinding.inflate(layoutInflater)
-
         setContentView(binding.root)
 
         if (viewModel.locationLng.isEmpty()) {
@@ -75,7 +64,7 @@ class WeatherActivity : AppCompatActivity() {
         binding.swipeRefresh.setOnRefreshListener {
             refreshWeather()
         }
-        bindingNow.navBtn.setOnClickListener {
+        binding.now.navBtn.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.drawerLayout.addDrawerListener(object : DrawerLayout.DrawerListener {
@@ -102,25 +91,25 @@ class WeatherActivity : AppCompatActivity() {
 
     private fun showWeatherInfo(weather: Weather) {
 
-        bindingNow.placeName.text = viewModel.placeName
+        binding.now.placeName.text = viewModel.placeName
         val realtime = weather.realtime
         val daily = weather.daily
         // 填充now.xml布局中的数据
         val currentTempText = "${realtime.temperature.toInt()} ℃"
-        bindingNow.currentTemp.text = currentTempText
-        bindingNow.currentSky.text = getSky(realtime.skycon).info
+        binding.now.currentTemp.text = currentTempText
+        binding.now.currentSky.text = getSky(realtime.skycon).info
         val currentPM25Text = "空气指数 ${realtime.airQuality.aqi.chn.toInt()}"
-        bindingNow.currentAQI.text = currentPM25Text
-        bindingNow.nowLayout.setBackgroundResource(getSky(realtime.skycon).bg)
+        binding.now.currentAQI.text = currentPM25Text
+        binding.now.nowLayout.setBackgroundResource(getSky(realtime.skycon).bg)
         // 填充forecast.xml布局中的数据
-        bindingForecast.forecastLayout.removeAllViews()
+        binding.forecast.forecastLayout.removeAllViews()
         val days = daily.skycon.size
         for (i in 0 until days) {
             val skycon = daily.skycon[i]
             val temperature = daily.temperature[i]
             val view = LayoutInflater.from(this).inflate(
                 R.layout.forecast_item,
-                bindingForecast.forecastLayout, false
+                binding.forecast.forecastLayout, false
             )
             val dateInfo = view.findViewById(R.id.dateInfo) as TextView
             val skyIcon = view.findViewById(R.id.skyIcon) as ImageView
@@ -133,14 +122,14 @@ class WeatherActivity : AppCompatActivity() {
             skyInfo.text = sky.info
             val tempText = "${temperature.min.toInt()} ~ ${temperature.max.toInt()} ℃"
             temperatureInfo.text = tempText
-            bindingForecast.forecastLayout.addView(view)
+            binding.forecast.forecastLayout.addView(view)
         }
         // 填充life_index.xml布局中的数据
         val lifeIndex = daily.lifeIndex
-        bindingLif.coldRiskText.text = lifeIndex.coldRisk[0].desc
-        bindingLif.dressingText.text = lifeIndex.dressing[0].desc
-        bindingLif.ultravioletText.text = lifeIndex.ultraviolet[0].desc
-        bindingLif.carWashingText.text = lifeIndex.carWashing[0].desc
+        binding.lifeIndex.coldRiskText.text = lifeIndex.coldRisk[0].desc
+        binding.lifeIndex.dressingText.text = lifeIndex.dressing[0].desc
+        binding.lifeIndex.ultravioletText.text = lifeIndex.ultraviolet[0].desc
+        binding.lifeIndex.carWashingText.text = lifeIndex.carWashing[0].desc
         binding.weatherLayout.visibility = View.VISIBLE
     }
 }

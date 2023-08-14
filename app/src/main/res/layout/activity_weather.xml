@@ -22,11 +22,11 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <include layout="@layout/now" />
+                <include android:id="@+id/now" layout="@layout/now" />
 
-                <include layout="@layout/forecast" />
+                <include android:id="@+id/forecast" layout="@layout/forecast" />
 
-                <include layout="@layout/life_index" />
+                <include android:id="@+id/life_index" layout="@layout/life_index" />
 
             </LinearLayout>
 
